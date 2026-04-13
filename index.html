@@ -1316,15 +1316,22 @@ function gradeActivity() {
 
 // ── PDF ───────────────────────────────────────────────
 function savePDF() {
-  const { done, total } = countComplete();
-  const name = document.getElementById('studentName').value || '___________';
-  const period = document.getElementById('studentPeriod').value || '___';
-  const el = document.createElement('div');
-  el.style.cssText = 'background:#1a1008;color:#f5f0e8;padding:12px 20px;font-family:monospace;font-size:13pt;font-weight:bold;margin-bottom:16px;-webkit-print-color-adjust:exact;';
-  el.textContent = `SCORE: ${done}/${total}  |  WORD BANK: ${checkWordBank()}/4  |  NAME: ${name}  |  PERIOD: ${period}`;
-  document.querySelector('.main').prepend(el);
-  window.print();
-  setTimeout(() => el.remove(), 1000);
+  try {
+    const name = document.getElementById('studentName').value || '___________';
+    const period = document.getElementById('studentPeriod').value || '___';
+    let mcDone = 0;
+    Object.keys(MC_KEY).forEach(n => { if (document.querySelector('input[name="' + n + '"]:checked')) mcDone++; });
+    const allCERText = getCERText().toLowerCase();
+    let wbCount = 0;
+    VOCAB_WORDS.forEach(w => { if (allCERText.includes(w.toLowerCase())) wbCount++; });
+    const el = document.createElement('div');
+    el.id = 'pdf-score-bar';
+    el.style.cssText = 'background:#1a1008;color:#f5f0e8;padding:12px 20px;font-family:monospace;font-size:12pt;font-weight:bold;margin-bottom:16px;-webkit-print-color-adjust:exact;print-color-adjust:exact;';
+    el.textContent = 'MC: ' + mcDone + '/' + Object.keys(MC_KEY).length + '  |  VOCAB: ' + wbCount + '/4  |  NAME: ' + name + '  |  PERIOD: ' + period;
+    document.querySelector('.main').prepend(el);
+    window.print();
+    setTimeout(() => { const bar = document.getElementById('pdf-score-bar'); if (bar) bar.remove(); }, 1500);
+  } catch(e) { window.print(); }
 }
 
 // ── INIT ──────────────────────────────────────────────
